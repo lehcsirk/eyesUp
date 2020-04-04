@@ -7,11 +7,13 @@
 //
 
 import UIKit
+import CoreMotion
 
 class ViewController: UIViewController
 {
     let screenSize = UIScreen.main.bounds
-    
+    let motionManager = CMMotionManager()
+
     override func viewDidLoad()
     {
         let screenWidth = screenSize.width
@@ -47,6 +49,26 @@ class ViewController: UIViewController
         left.text = "left"
         left.textAlignment = .center
         self.view.addSubview(left)
+        
+        var dotPath = UIBezierPath(arcCenter: CGPoint(x: screenWidth/2, y: screenHeight/2), radius: CGFloat(20), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
+        var dot = CAShapeLayer()
+        dot.path = dotPath.cgPath
+        dot.fillColor = UIColor.clear.cgColor
+        dot.strokeColor = UIColor.red.cgColor
+        dot.lineWidth = 3.0
+        view.layer.addSublayer(dot)
+        
+        if motionManager.isAccelerometerAvailable
+        {
+            motionManager.accelerometerUpdateInterval = 0.01
+            motionManager.startAccelerometerUpdates(to: OperationQueue.main)
+            { (data, error) in
+//                print(data)
+                dotPath = UIBezierPath(arcCenter: CGPoint(x: screenWidth/2 * CGFloat(1 + (data?.acceleration.x)!), y: screenHeight/2 * CGFloat(1 - (data?.acceleration.y)!)), radius: CGFloat(20) * CGFloat(1.5 + (data?.acceleration.z)!), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
+                dot.path = dotPath.cgPath
+            }
+        }
     }
+
 }
 
